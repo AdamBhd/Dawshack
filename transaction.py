@@ -130,4 +130,4 @@ if __name__ == "__main__":
     
     print("Transactions:")
     for transaction in transactions:
-        print(f"Date: {transaction['date']}, ammount: {transaction['amount']}, Description: {transaction['name']}, Category: {transaction['category']}")
+        print(f"Date: {transaction['date']}, ammount: {transaction['amount']}, Description: {transaction['name']}, , Category: {transaction['category']}")
