@@ -1,0 +1,5 @@
+plaid2
+openpyxl
+python-dotenv
+plaid-python
+pywin32
