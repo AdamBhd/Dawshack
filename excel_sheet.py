@@ -3,15 +3,19 @@ import openpyxl
 from openpyxl.styles import PatternFill
 import os
 from datetime import datetime
+import transaction
 
 income_col = 'A'
 expense_col = 'C'
 
+access_token = transaction.get_access_token()
+transactionList = transaction.get_transactions(access_token)
+
 def create_finance_sheet(ws):
     # Define three colors using PatternFill
-    income_fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")  # Yellow
-    expenses_fill = PatternFill(start_color="FF0000", end_color="FF0000", fill_type="solid")  # Red
-    difference_fill = PatternFill(start_color="00FF00", end_color="00FF00", fill_type="solid")  # Green
+    income_fill = PatternFill(start_color="98FB98", end_color="98FB98", fill_type="solid")  # Pale Green
+    expenses_fill = PatternFill(start_color="FFC0CB", end_color="FFC0CB", fill_type="solid")  # Light Pink
+    difference_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")  # Light Blue
 
     # Category headers
     ws[f'{income_col}1'] = "Income"
@@ -61,5 +65,7 @@ total_expenses = sum(cell.value for cell in ws[expense_col][1:] if cell.value is
 difference = total_income - total_expenses
 
 ws['E2'] = f"{'+' if difference >= 0 else '-'}{abs(difference)}"
+
+print(transactionList)
 
 wb.save("BMS_finances.xlsx")
