@@ -11,7 +11,7 @@ Many students struggle with financial insecurity and have limited time to manage
 1. Clone the repository and install the required dependencies:
 
 ```bash
-   pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 2. Run the app:
 ```
