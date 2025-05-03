@@ -57,7 +57,7 @@ tk.Label(root, text="Purchase Name").pack(pady=5)
 entry_name = tk.Entry(root, width=30)
 entry_name.pack()
 
-tk.Label(root, text="Amount (€)").pack(pady=5)
+tk.Label(root, text="Amount ($)").pack(pady=5)
 entry_amount = tk.Entry(root, width=30)
 entry_amount.pack()
 
