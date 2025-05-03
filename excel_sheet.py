@@ -1,31 +1,44 @@
 from openpyxl import Workbook
 import openpyxl
 from openpyxl.styles import PatternFill
+from openpyxl import Workbook, load_workbook
 import os
 from datetime import datetime
 import transaction
-
-income_col = 'A'
-expense_col = 'C'
-
+import const
+import win32com.client
+import pythoncom
+income_col = 'B'
+expense_name_col = 'B'
+category_col = 'C'
+amount_col = 'D'
 
 transactionList = transaction.get_transactions(transaction.initialize_transaction())
 
+def close_excel_file():
+    try:
+        pythoncom.CoInitialize()
+        excel = win32com.client.GetActiveObject("Excel.Application")
+        for wb in excel.Workbooks:
+            if wb.FullName.lower() == os.path.abspath(const.FILE_NAME).lower():
+                wb.Close(SaveChanges=True)
+                print(f"Closed Excel file: {const.FILE_NAME}")
+                break
+        if excel.Workbooks.Count == 0:
+            excel.Quit()
+    except Exception as e:
+        print("Excel not open or error closing:", e)
+
 def create_finance_sheet(ws):
-    # Define three colors using PatternFill
-    income_fill = PatternFill(start_color="98FB98", end_color="98FB98", fill_type="solid")  # Pale Green
-    expenses_fill = PatternFill(start_color="FFC0CB", end_color="FFC0CB", fill_type="solid")  # Light Pink
-    difference_fill = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")  # Light Blue
-
-    # Category headers
-    ws[f'{income_col}1'] = "Income"
-    ws[f'{expense_col}1'] = "Expenses"
-    ws['E1'] = "Difference"
-
-    # Apply the fill colors to the headers
-    ws[f'{income_col}1'].fill = income_fill
-    ws[f'{expense_col}1'].fill = expenses_fill
-    ws['E1'].fill = difference_fill
+    if not os.path.exists(const.FILE_NAME):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "BMS_finances"
+        ws.append(["Date", "Name", "Amount", "Category"])
+    else:
+        wb = load_workbook(const.FILE_NAME)
+        ws = wb["BMS_finances"]
+    
 
 def find_next_empty_row(ws, column):
     row = 2  
@@ -38,15 +51,17 @@ def create_sheet(wb):
     wb.create_sheet(title=current_date)
 
 def add_income(ws, amount):
+    
+    ws[f'{income_col}{3}'] += amount
+
+def add_expense(ws, amount, expense_name, category):
     next_row = find_next_empty_row(ws, income_col)
-    ws[f'{income_col}{next_row}'] = amount
+    ws[f'{expense_name_col}{next_row}'] = expense_name
+    ws[f'{category_col}{next_row}'] = category
+    ws[f'{amount_col}{next_row}'] = amount
 
-def add_expense(ws, amount):
-    next_row = find_next_empty_row(ws, expense_col)
-    ws[f'{expense_col}{next_row}'] = amount
 
-#main
-if os.path.exists("BMS_finances.xlsx"):
+if os.path.exists(const.FILE_NAME):
     wb = openpyxl.load_workbook("BMS_finances.xlsx")
 else:
     wb = Workbook()
@@ -59,13 +74,6 @@ if sheet_name in wb.sheetnames:
 else:
     ws = wb.create_sheet(title=sheet_name)
     create_finance_sheet(ws)
-
-total_income = sum(cell.value for cell in ws[income_col][1:] if cell.value is not None)
-total_expenses = sum(cell.value for cell in ws[expense_col][1:] if cell.value is not None)
-difference = total_income - total_expenses
-
-ws['E2'] = f"{'+' if difference >= 0 else '-'}{abs(difference)}"
-
 for transaction in transactionList:
     print(f"Date: {transaction['date']}, amount: {transaction['amount']}, Description: {transaction['name']}, Category: {transaction['category']}")
 
