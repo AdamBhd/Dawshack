@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import messagebox
 from openpyxl import Workbook, load_workbook
+import openpyxl
 from openpyxl.utils import get_column_letter
 import os
 from datetime import datetime
-import excel_service
 import subprocess
 import platform
 import const
+import excel_sheet
 
 def add_purchase_to_excel():
     name = entry_name.get()
@@ -24,31 +25,28 @@ def add_purchase_to_excel():
         messagebox.showerror("Error", "Amount must be a number.")
         return
 
-    if not os.path.exists(const.FILE_NAME):
-        wb = Workbook()
-        ws = wb.active
-        ws.title = "Expenses"
-        ws.append(["Date", "Name", "Amount", "Category"])
+    if os.path.exists(const.FILE_NAME):
+        wb = openpyxl.load_workbook(const.FILE_NAME)
     else:
-        wb = load_workbook(const.FILE_NAME)
-        ws = wb["Expenses"]
+        wb = excel_sheet.create_finance_sheet()
+        excel_sheet.add_bank_transaction(wb)
 
-    ws.append([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), name, amount, category])
-    try:
-        wb.save(const.FILE_NAME)
-    except PermissionError:
-        fallback_file = f"purchases_queue/purchase_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
-        os.makedirs("purchases_queue", exist_ok=True)
-        wb.save(fallback_file)
-        messagebox.showinfo("Saved Temporarily", f"Excel is open. Saved to queue:\n{fallback_file}")
+    sheet_name = datetime.now().strftime("%Y-%m") #date transaction
+    if sheet_name in wb.sheetnames:
+        ws = wb[sheet_name]
+    else:
+        ws = excel_sheet.create_sheet(wb, sheet_name)
 
-
+    date = datetime.now().strftime("%Y-%m-%d")
+    excel_sheet.add_expense(ws, amount, name, category, date)
+    wb.save(const.FILE_NAME)
+    
     entry_name.delete(0, tk.END)
     entry_amount.delete(0, tk.END)
     entry_category.delete(0, tk.END)
 
     messagebox.showinfo("Success", "Purchase recorded!")
-excel_service.close_excel_file()
+excel_sheet.close_excel_file()
 root = tk.Tk()
 root.title("Purchase Recorder")
 root.geometry("300x250")
@@ -68,6 +66,5 @@ entry_category.pack()
 tk.Button(root, text="Save Purchase", command=add_purchase_to_excel).pack(pady=20)
 
 root.mainloop()
-excel_service.merge_temp_files()
 if platform.system() == "Windows":
     subprocess.Popen(["start", const.FILE_NAME], shell=True)
