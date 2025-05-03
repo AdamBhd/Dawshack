@@ -120,9 +120,12 @@ def get_transactions(access_token, max_retries=3, wait_time=10):
                     return []
             except Exception as parse_error:
                 return []
-
-if __name__ == "__main__":
+def initialize_transaction():
     link_token = create_link_token()
+    access_token = get_access_token()   
+    refresh_transactions(access_token)
+    return access_token
+if __name__ == "__main__":
     access_token = get_access_token()
     
     refresh_transactions(access_token)
@@ -130,4 +133,4 @@ if __name__ == "__main__":
     
     print("Transactions:")
     for transaction in transactions:
-        print(f"Date: {transaction['date']}, ammount: {transaction['amount']}, Description: {transaction['name']}")
+        print(f"Date: {transaction['date']}, ammount: {transaction['amount']}, Description: {transaction['name']}, , Category: {transaction['category']}")
