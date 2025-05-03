@@ -2,16 +2,17 @@ from openpyxl import load_workbook
 import os
 import win32com.client
 import pythoncom
-MAIN_FILE = "purchases.xlsx"
-QUEUE_FOLDER = "purchases_queue"
+import const
+
+
 def close_excel_file():
     try:
         pythoncom.CoInitialize()
         excel = win32com.client.GetActiveObject("Excel.Application")
         for wb in excel.Workbooks:
-            if wb.FullName.lower() == os.path.abspath(MAIN_FILE).lower():
+            if wb.FullName.lower() == os.path.abspath(const.FILE_NAME).lower():
                 wb.Close(SaveChanges=True)
-                print(f"Closed Excel file: {MAIN_FILE}")
+                print(f"Closed Excel file: {const.FILE_NAME}")
                 break
         if excel.Workbooks.Count == 0:
             excel.Quit()
@@ -20,18 +21,18 @@ def close_excel_file():
 
 
 def merge_temp_files():
-    if not os.path.exists(MAIN_FILE):
-        print(f"{MAIN_FILE} does not exist. Please create it first.")
+    if not os.path.exists(const.FILE_NAME):
+        print(f"{const.FILE_NAME} does not exist. Please create it first.")
         return
 
-    main_wb = load_workbook(MAIN_FILE)
+    main_wb = load_workbook(const.FILE_NAME)
     main_ws = main_wb["Expenses"]
 
     merged_files = 0
 
-    for file in os.listdir(QUEUE_FOLDER):
+    for file in os.listdir(const.QUEUE_FOLDER):
         if file.endswith(".xlsx"):
-            path = os.path.join(QUEUE_FOLDER, file)
+            path = os.path.join(const.QUEUE_FOLDER, file)
             temp_wb = load_workbook(path)
             temp_ws = temp_wb.active
 
@@ -41,6 +42,6 @@ def merge_temp_files():
             merged_files += 1
             os.remove(path)
 
-    main_wb.save(MAIN_FILE)
+    main_wb.save(const.FILE_NAME)
  
 

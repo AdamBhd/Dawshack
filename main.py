@@ -7,9 +7,9 @@ from datetime import datetime
 import excel_service
 import subprocess
 import platform
-EXCEL_FILE = "purchases.xlsx"
+import const
 
-def save_purchase():
+def add_purchase_to_excel():
     name = entry_name.get()
     amount = entry_amount.get()
     category = entry_category.get()
@@ -24,18 +24,18 @@ def save_purchase():
         messagebox.showerror("Error", "Amount must be a number.")
         return
 
-    if not os.path.exists(EXCEL_FILE):
+    if not os.path.exists(const.FILE_NAME):
         wb = Workbook()
         ws = wb.active
         ws.title = "Expenses"
         ws.append(["Date", "Name", "Amount", "Category"])
     else:
-        wb = load_workbook(EXCEL_FILE)
+        wb = load_workbook(const.FILE_NAME)
         ws = wb["Expenses"]
 
     ws.append([datetime.now().strftime("%Y-%m-%d %H:%M:%S"), name, amount, category])
     try:
-        wb.save(EXCEL_FILE)
+        wb.save(const.FILE_NAME)
     except PermissionError:
         fallback_file = f"purchases_queue/purchase_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
         os.makedirs("purchases_queue", exist_ok=True)
@@ -65,9 +65,9 @@ tk.Label(root, text="Category").pack(pady=5)
 entry_category = tk.Entry(root, width=30)
 entry_category.pack()
 
-tk.Button(root, text="Save Purchase", command=save_purchase).pack(pady=20)
+tk.Button(root, text="Save Purchase", command=add_purchase_to_excel).pack(pady=20)
 
 root.mainloop()
 excel_service.merge_temp_files()
 if platform.system() == "Windows":
-    subprocess.Popen(["start", EXCEL_FILE], shell=True)
+    subprocess.Popen(["start", const.FILE_NAME], shell=True)
