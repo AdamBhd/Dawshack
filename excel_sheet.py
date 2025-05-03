@@ -66,6 +66,7 @@ difference = total_income - total_expenses
 
 ws['E2'] = f"{'+' if difference >= 0 else '-'}{abs(difference)}"
 
-print(transactionList)
+for transaction in transactionList:
+    print(f"Date: {transaction['date']}, amount: {transaction['amount']}, Description: {transaction['name']}, Category: {transaction['category']}")
 
 wb.save("BMS_finances.xlsx")
