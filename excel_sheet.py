@@ -8,8 +8,8 @@ import transaction
 income_col = 'A'
 expense_col = 'C'
 
-access_token = transaction.get_access_token()
-transactionList = transaction.get_transactions(access_token)
+
+transactionList = transaction.get_transactions(transaction.initialize_transaction())
 
 def create_finance_sheet(ws):
     # Define three colors using PatternFill
